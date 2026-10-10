@@ -1,0 +1,23 @@
+{
+  "skill_name": "website-auto-update",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "让这个站自动更新吧，每天自动同步原站新内容",
+      "expected_output": "先确认项目数据文件/构建脚本/部署命令，复制 assets/update-template.js 填好 CONFIG，试运行 --no-deploy，模拟删两条数据验证能自动补回，真跑一次部署，并用 scripts/register-schedule.ps1 注册每日计划任务",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "改成每两天更新一次就行",
+      "expected_output": "重跑 register-schedule.ps1 -DaysInterval 2 就地更新触发器，不新建重复任务，并用 NextRunTime 核对",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "这个网站是怎么自动更新的？帮我看看有没有问题",
+      "expected_output": "读项目 README 与 update.js，查看 update-log.txt 最近一次记录和 backup 数量，必要时空跑一次 --no-deploy 核对本地校验数字",
+      "files": []
+    }
+  ]
+}
