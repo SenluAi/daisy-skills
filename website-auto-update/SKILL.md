@@ -1,4 +1,4 @@
-﻿---
+---
 name: website-auto-update
 description: 给已复刻或自建的静态网站做定时自动更新——抓原站新内容、只抓新增详情页、重建页面、本地校验、部署、线上校验，并注册 Windows 计划任务。用户说「让这个站自动更新」「每天/每两天自动同步原站」「网站内容自动抓取更新」「做个网站更新脚本」「改成每两天更新一次」时使用。
 ---
@@ -57,5 +57,4 @@ description: 给已复刻或自建的静态网站做定时自动更新——抓�
 - `assets/update-template.js` — 通用更新脚本模板（含备份、只抓新增、校验、部署、线上校验、日志）。
 - `scripts/register-schedule.ps1` — 注册/修改计划任务（`-DaysInterval 1|2|7`、`-At 9am`）。
 - `evals/evals.json` — 触发用例。
-- 真实完整样板：`%USERPROFILE%\Desktop\hellogithub-clone\update.js`（HelloGitHub 镜像站，含 60 条数据的实战版本），改别的站时对照它填 CONFIG 最省事。
-
+- 真实完整样板：`C:\Users\Mr Li\Desktop\hellogithub-clone\update.js`（HelloGitHub 镜像站，含 60 条数据的实战版本），改别的站时对照它填 CONFIG 最省事。

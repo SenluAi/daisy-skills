@@ -1,4 +1,4 @@
-﻿---
+---
 name: "AI错题本"
 description: "把真实踩过的坑记成错因＋纠正路径，下次不再重复犯错。用户说「记错题」「记一笔」「吸取教训」「别重复犯错」「复盘一下刚才」「你上次错在哪」时用。"
 ---
@@ -6,8 +6,8 @@ description: "把真实踩过的坑记成错因＋纠正路径，下次不再重
 # Skill：AI 错题本（self-improving-agent）
 
 ## 文件位置
-- 技能文件：`%USERPROFILE%\AppData\Roaming\Daisy\extensions\skills\self-improving-agent\SKILL.md`
-- 错题本记录：`%USERPROFILE%\AppData\Roaming\Daisy\extensions\skills\self-improving-agent\_错题本.md`
+- 技能文件：`C:\Users\Mr Li\AppData\Roaming\Daisy\extensions\skills\self-improving-agent\SKILL.md`
+- 错题本记录：`C:\Users\Mr Li\AppData\Roaming\Daisy\extensions\skills\self-improving-agent\_错题本.md`
 
 ## 触发场景
 - 用户说「记错题」「记一笔」「这个坑记住」「以后别再犯」时，把这次真实错误写进错题本。
@@ -20,7 +20,7 @@ description: "把真实踩过的坑记成错因＋纠正路径，下次不再重
 
 ## 执行步骤
 1. 任务结束时先判断本轮有没有犯错或绕路：工具 ok=false、点了没反应、路径/人名猜错、无效动作重复。
-2. 有 → 往 `%USERPROFILE%\AppData\Roaming\Daisy\extensions\skills\self-improving-agent\_错题本.md` 的表格追加一行，字段：日期 / 任务 / 错在哪（原文报错）/ 纠正路径 / 下次怎么做。
+2. 有 → 往 `C:\Users\Mr Li\AppData\Roaming\Daisy\extensions\skills\self-improving-agent\_错题本.md` 的表格追加一行，字段：日期 / 任务 / 错在哪（原文报错）/ 纠正路径 / 下次怎么做。
 3. 每条只写一句可执行结论，不写流水账；同一个坑只留一条，再犯就在原条后标「×2」，不新开行。
 4. 开工前读该文件最近 10 条；命中同类先按纠正路径执行，绝不原样重试。
 5. 用户问「你上次错在哪」时直接读该文件回答，不凭回忆。
@@ -29,4 +29,3 @@ description: "把真实踩过的坑记成错因＋纠正路径，下次不再重
 - 写成情绪化检讨或长文复盘 → 没用，只留「错因＋下次动作」。
 - 记了不看 → 等于没记，开工前必须先读。
 - 把工具的能力限制（如 Windows 未实现的备忘录、邮件）当错题记 → 该记的是我的选择错误。
-
