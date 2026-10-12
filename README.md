@@ -24,7 +24,7 @@
 | 教学 | teach | 跨多次会话教用户学会一个新技能或概念 |
 | 教学 | multi-session-teaching | 把学一个主题当成跨会话的长期工程，用文件保存进度 |
 | 交接 | handoff / session-handoff | 把当前对话压缩成交接文档，方便下一个代理接手继续 |
-| 备份 | backup-source-to-github | 把本地源码备份到 GitHub：建仓、提交、推送一条龙 |
+| 备份 | backup-source-to-github | 把源码备份到 GitHub 或去掉仓库的 fork 标记（脱钩）：建仓、提交、推送、Leave fork network 一条龙 |
 
 ## 目录结构
 
