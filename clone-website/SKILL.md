@@ -100,17 +100,11 @@ description: "把网站完整复刻成可离线/可部署的静态站——全�
 - 改完 HTML 后旧的筛选/过滤脚本选择器会失效，页面看似正常但筛选全空，记得一起改。
 
 ## 自动更新（原站新增内容自动进站，可选）
-用户要“每天自动同步原站”时，在项目里做一个 `update.js`，用系统计划任务定时跑，流程固定为：
-1. 抓原站列表（优先用官方 API/结构化接口，其次解析首页卡片）→ 与本地数据文件比对，找出新增条目。
-2. 只抓新增条目的详情页，缓存原始 HTML，老条目跳过；重新提取数据文件。
-3. 重建**所有**数据驱动的页面（详情页、标签页、榜单页、期刊页、文章页、全部条目页、分页），把新增卡片按站内链接插入首页（新卡片一开始就写成 `./repo/xxx.html` + `data-card="1"`，不要留原站/外链）；频道页的 tab 链接同样保持站内；新增详情页要带 GitHub 源码按钮（数据里没有 `full_name` 就先生成、别留下无按钮的页面）。
-4. **本地校验通过才部署**：非 GitHub 外链必须为 0、死链 `href="#"` 必须为 0、站内链接指向的文件必须都存在、含项目的详情页 GitHub 链接数 ≥1；校验不过就终止，并把改动前的文件备份到 `backup/时间戳/` 供回滚。
-5. 部署后做线上校验（首页站内链接数、随便抽一个新详情页含 GitHub 链接、标签/榜单/期刊索引页返回码），全部写进 `update-log.txt`。
-6. 备份目录只保留最近 7 份，避免无限增长。
 
-Windows 计划任务注意：
-- 用 `New-ScheduledTaskAction -Execute 'C:\Program Files\nodejs\node.exe' -Argument '"…\update.js"' -WorkingDirectory …` 注册；
-  **不要**把带空格的项目路径直接塞进 `schtasks /TR`，它会在空格处拆成 Execute/Arguments，任务报 0x80070002「找不到指定的文件」。
-- 批处理启动脚本必须写 **CRLF** 行尾，否则 cmd 会把多行拼错（报 “'dp0\"' 不是内部或外部命令”）。
-- 让 node 自己写日志文件；批处理 stdout 重定向到**另一个**文件，重定向到同一个日志会 EBUSY。
-- 写 .ps1 时别用无 BOM 的 UTF-8 中文，PowerShell 5.1 会按 ANSI 读导致解析报错（改成英文输出或用 BOM）。
+用户要「每天/每两天自动同步原站」时，在项目里做一个 `update.js`（抓原站列表 → 只抓新增详情页 → 重建全部数据驱动页面 → 校验 → 部署 → 线上抽查）。**定时一律跑在云端，不用本地电脑挂计划任务**（关机、合盖、没登录就断档）。细节与模板见 `website-auto-update` 技能，这里只留和复刻站对接的要点：
+
+- **站点在 Cloudflare（本技能的默认部署方式：wrangler + senlinlu.cn）**：定时用 **Cron Worker 定时 POST Pages Deploy Hook**，抓取与重建放进 Pages 构建命令（`node update.js --no-deploy`），页面永远由构建生成，Worker 无状态。拷 `website-auto-update` 技能的 `assets/cron-worker.js` + `assets/wrangler.toml`，改 `name` 和 `[triggers] crons`，`npx wrangler secret put DEPLOY_HOOK_URL` 后 `npx wrangler deploy`；Deploy Hook 只负责「触发一次构建」，它自己不会定时，也不会帮你抓数据。
+- **站点部署在 GitHub（Pages / 源码在仓库里）**：用 **GitHub Actions `schedule`** 跑 `node update.js`，拷 `assets/workflow-update.yml`，密钥（`CLOUDFLARE_API_TOKEN` 等）走 Settings → Secrets，改动要提交回仓库。
+- **脚本与调度解耦**：`update.js` 只做「抓→建→校验→部署」，跑在哪由外层调度决定（Cron Worker / Actions schedule 都调同一个文件）。校验不过就退出码非 0，构建/任务失败、线上保持上一版，天然满足「宁可今天不更新」。
+- **更新流程与复刻规则一致**：只抓新增、老条目跳过；新卡片一开始就写成 `./repo/xxx.html` + `data-card="1"`，不留原站外链；重建**所有**数据驱动页面（详情页、标签页、榜单页、期刊页、文章页、全部条目页、分页）；管住三条硬指标——非 GitHub 外链 0、`href="#"` 0、站内链接目标文件都存在；新增详情页要带 GitHub 源码按钮（数据里没 `full_name` 就先生成，别留无按钮页面）；备份改动前文件到 `backup/时间戳/` 只留 7 份；全过程写 `update-log.txt`。
+- **云端注意**：cron 是 **UTC**（北京 09:00 写 `0 1 * * *`，每两天写 `0 1 */2 * *`），整点可能延迟几分钟；云端出网是数据中心 IP，原站风控可能 403 或弹验证码，先手动触发试跑一次，被拦就上 Cloudflare Browser Rendering（`@cloudflare/puppeteer`）或 Actions 里的 Playwright；Worker 无持久文件系统，`raw/`、`backup/`、日志这些只在构建过程里成立。
