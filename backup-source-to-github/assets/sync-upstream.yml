@@ -1,0 +1,48 @@
+# 上游同步工作流模板 —— 由技能「备份源码到GitHub」提供
+# 用法：把本文件放到镜像仓库的 .github/workflows/sync-upstream.yml，
+#      把 <上游owner>/<上游repo> 换成真实上游，然后 Actions 页手动跑一次验证。
+# 作用：GitHub 服务器定时把上游新提交合进本仓库，不依赖本地电脑开机。
+#       仓库有没有 fork 标记都能用（脱钩后照样跑）。
+
+name: Sync upstream
+
+on:
+  schedule:
+    # UTC 时间；北京时间 = UTC + 8。北京凌晨 03:23 -> "23 19 * * *"
+    - cron: '23 19 * * *'
+  workflow_dispatch: {}   # 支持手动点一次，先验证再交给定时
+
+permissions:
+  contents: write         # 需要推送权限
+
+concurrency:
+  group: sync-upstream
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # 合并需要完整历史
+
+      # 上游没有新提交时会正常空跑结束，不是故障
+      - name: Merge upstream
+        run: |
+          git config user.name  "sync-bot"
+          git config user.email "sync-bot@users.noreply.github.com"
+          git remote add upstream https://github.com/<上游owner>/<上游repo>.git
+          git fetch upstream main
+          # 有冲突时这里会失败并停下来，等人工处理，不会强推
+          git merge upstream/main --no-edit
+          git push origin main
+
+# 注意：
+# 1) 上游默认分支不是 main（例如 master）时，把上面两处 main 改掉。
+# 2) 首次使用务必先 workflow_dispatch 手动跑一次，Actions 显示绿色 Success 才算通。
+# 3) 跑完到仓库 commits 页确认是否出现 "Merge remote-tracking branch 'upstream/main'"
+#    以及上游那笔新提交是否已并入，不要只看工作流颜色。
+# 4) 绝对不要改成 git push --force，也不要把本仓库改动反向推回上游。
+# 5) 仓库连续 60 天无活动时 GitHub 会停用 schedule，手动跑一次或提交一次即可恢复。
