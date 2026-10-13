@@ -1,11 +1,12 @@
 # 云端定时更新模板：GitHub Actions schedule
 # 用法：复制到站点仓库的 .github/workflows/update.yml，按项目改 cron、构建命令与 CONFIG 环境变量
+# 默认节奏：每两天一次（跟着「全部都更新、新增内容也要更新」的需求走，不用跑太勤）
 name: site-auto-update
 
 on:
   schedule:
-    # 时间是 UTC！北京时间每天 09:00 = 01:00 UTC；每两天一次写 0 1 */2 * *
-    - cron: "0 1 * * *"
+    # 时间是 UTC！北京时间每两天 11:00 = 03:00 UTC；想改成每天写 0 3 * * *，每周写 0 3 * * 1
+    - cron: "0 3 */2 * *"
   workflow_dispatch: {}
 
 permissions:
