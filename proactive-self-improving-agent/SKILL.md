@@ -1,7 +1,7 @@
 ---
 name: proactive-self-improving-agent
 version: 1.1.0
-description: "自动捕获经验并安全进化，同时当错题本用。触发条件：(1)命令/操作失败 (2)被用户纠正(不对/应该是) (3)用户需要不存在的能力 (4)外部API/工具出错 (5)发现自己知识过时 (6)发现更好做法 (7)每个任务完成时回顾过程。用户说「记错题」「记一笔」「吸取教训」「别重复犯错」「复盘一下刚才」「你上次错在哪」时也用。记录写入本机 C:\Users\Mr Li\AppData\Roaming\Daisy\extensions\skills\proactive-self-improving-agent\.learnings\ 下的 LEARNINGS.md / ERRORS.md / FEATURE_REQUESTS.md，并追加 CHANGELOG.md JSONL 日志；去重：没有新经验或不比已有新就别写；同一个坑再犯只在原条目标 ×2，不新开行；开工前先读最近 10 条按纠正路径执行；经验反复≥3 次晋升到 AGENTS.md/TOOLS.md/SOUL.md。详见正文。"
+description: "自动捕获经验并安全进化，同时当错题本用。触发条件：(1)命令/操作失败 (2)被用户纠正(不对/应该是) (3)用户需要不存在的能力 (4)外部API/工具出错 (5)发现自己知识过时 (6)发现更好做法 (7)每个任务完成时回顾过程。用户说「记错题」「记一笔」「吸取教训」「别重复犯错」「复盘一下刚才」「你上次错在哪」时也用。经验写入 Daisy 技能目录下 proactive-self-improving-agent 的 .learnings 文件夹：LEARNINGS.md、ERRORS.md、FEATURE_REQUESTS.md、CHANGELOG.md；去重：没有新经验或不比已有新就别写；同一个坑再犯只在原条目标 ×2，不新开行；开工前先读最近 10 条按纠正路径执行；经验反复≥3 次晋升到 AGENTS.md/TOOLS.md/SOUL.md。详见正文。"
 author: yanhongxi-openclaw
 ---
 
