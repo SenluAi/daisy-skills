@@ -1,6 +1,6 @@
 ---
 name: "网站复刻"
-description: "把网站完整复刻成可离线/可部署的静态站——全站所有内容：导航每个栏目、每个 tab（月度/年度/周榜、精选/全部）、榜单、月刊每一期、文章列表与正文、标签页、分页、全部条目，页页都在站内，页内链接一律指向站内，唯一例外是项目源码的 GitHub 链接保留真实跳转。用户说「复刻网站」「仿站」「扒站」「存成静态站」「复刻整站」「全站复刻」「全部指向站内」「详情页也要复刻」「GitHub 链接要能点」时用。"
+description: "把网站完整复刻成可离线/可部署的静态站——全站所有内容：导航每个栏目、每个 tab（月度/年度/周榜、精选/全部）、榜单、月刊每一期、文章列表与正文、标签页、分页、全部条目，页页都在站内，页内链接一律指向站内，唯一例外是项目源码的 GitHub 链接保留真实跳转。用户说「复刻网站」「仿站」「扒站」「存成静态站」「复刻整站」「全站复刻」「全部指向站内」「详情页也要复刻」「GitHub 链接要能点」「复刻完把自动更新也带上」时用。"
 ---
 
 # Skill：把网站复刻成「全站内闭环」的静态站
@@ -101,14 +101,45 @@ description: "把网站完整复刻成可离线/可部署的静态站——全�
 
 ## 自动更新（原站新增内容自动进站，可选）
 
-用户要「每天/每两天自动同步原站」时，在项目里做一个 `update.js`（抓原站列表 → 只抓新增详情页 → 重建全部数据驱动页面 → 校验 → 部署 → 线上抽查）。**定时一律跑在云端，不用本地电脑挂计划任务**（关机、合盖、没登录就断档）。细节与模板见 `website-auto-update` 技能，这里只留和复刻站对接的要点：
+用户要「每天/每两天自动同步原站」时，在项目里做一个 `update.js`（抓原站列表 → 只抓新增详情页 → 重建全部数据驱动页面 → 校验 → 部署 → 线上抽查）。**定时一律跑在云端，不用本地电脑挂计划任务**（关机、合盖、没登录就断档）。完整方法与踩坑见 `website-auto-update` 技能，这里只留和复刻站对接的要点。
 
-- **站点在 Cloudflare（本技能的默认部署方式：wrangler + senlinlu.cn）**：定时用 **Cron Worker 定时 POST Pages Deploy Hook**，抓取与重建放进 Pages 构建命令（`node update.js --no-deploy`），页面永远由构建生成，Worker 无状态。落地就四步：
-  1. **改构建命令**：Cloudflare 面板 → Pages 项目 → Settings → Builds & deployments → Build command 改成 `node update.js --no-deploy`，Output directory 指向生成站点的目录（如 `site`）。这一步是把「抓新内容」真正挂进网站的构建里，不改它，Deploy Hook 每次只是重建旧内容。
-  2. **校验失败 = 构建失败 = 线上不换**：`update.js` 校验不过时退出码非 0，Pages 构建失败，线上保持上一个成功版本，天然满足「宁可今天不更新」。
-  3. **建 Deploy Hook，交给 Worker 定时**：同一页面 Deploy hooks 里建一个（如 `cron-daily`），复制完整 URL；拷 `website-auto-update` 技能的 `assets/cron-worker.js` + `assets/wrangler.toml`，改 `name` 和 `[triggers] crons`，`npx wrangler secret put DEPLOY_HOOK_URL` 后 `npx wrangler deploy`。Deploy Hook 只负责「触发一次构建」，它自己不会定时，也不会帮你抓数据。
-  4. **核对一次**：`npx wrangler tail` 看下一次触发，或访问 `https://<worker>.<账号>.workers.dev/?key=<ADMIN_KEY>` 手动触发，去 Pages 看是否出现新构建、新内容是否上线。
-- **站点部署在 GitHub（Pages / 源码在仓库里）**：用 **GitHub Actions `schedule`** 跑 `node update.js`，拷 `assets/workflow-update.yml`，密钥（`CLOUDFLARE_API_TOKEN` 等）走 Settings → Secrets，改动要提交回仓库。
+### 复刻收尾时就把定时模板放进项目（默认动作，不用等用户提）
+
+复刻完成、准备上线时，顺手把 `website-auto-update/assets/` 里的模板拷进复刻项目根目录，别等配云端时现找：
+
+- `cron-worker.js` + `wrangler.toml` —— Cloudflare 定时用；改 `name` 和 `[triggers] crons`（UTC 表达式）；
+- `workflow-update.yml` —— 站点部署在 GitHub 时拷到 `.github/workflows/update.yml`；
+- `update-template.js` → 改名 `update.js`，填顶部 `CONFIG`。
+
+同时在项目里留一份 `README-auto-update.md`，记下：项目类型（Pages 还是 Workers）、钩子名、cron 表达式、手动更新命令、日志位置、回滚方式。脚本里凡是文件路径一律 `path.join(__dirname, ...)`，写死 `C:\Users\...` 这类本地绝对路径，云端构建第一轮就挂。
+
+### 路线 A：站点是 Cloudflare Pages 项目
+
+定时用 **Cron Worker 定时 POST Pages Deploy Hook**，抓取与重建放进 Pages 构建命令（`node update.js --no-deploy`），页面永远由构建生成，Worker 无状态。落地就四步：
+
+1. **改构建命令**：Cloudflare 面板 → Pages 项目 → Settings → Builds & deployments → Build command 改成 `node update.js --no-deploy`，Output directory 指向生成站点的目录（如 `site`）。这一步是把「抓新内容」真正挂进网站的构建里，不改它，Deploy Hook 每次只是重建旧内容。
+2. **校验失败 = 构建失败 = 线上不换**：`update.js` 校验不过时退出码非 0，Pages 构建失败，线上保持上一个成功版本，天然满足「宁可今天不更新」。
+3. **建 Deploy Hook，交给 Worker 定时**：同一页面 Deploy hooks 里建一个（如 `cron-daily`），复制完整 URL；改 `cron-worker.js` 的 `name` 与 `wrangler.toml` 的 `[triggers] crons`，`npx wrangler secret put DEPLOY_HOOK_URL`（可选 `ADMIN_KEY`）后 `npx wrangler deploy`。Deploy Hook 只负责「触发一次构建」，它自己不会定时，也不会帮你抓数据。
+4. **核对一次**：`npx wrangler tail` 看下一次触发，或访问 `https://<worker>.<账号>.workers.dev/?key=<ADMIN_KEY>` 手动触发，去 Pages 看是否出现新构建、新内容是否上线。
+
+### 路线 B：站点是 Workers + 静态资源（Workers Builds，现在新建项目多是这种）
+
+1. Workers 项目 → 设置 → 构建 → 连接 Git 仓库，生产分支填 `main`，**非生产分支构建关掉**（否则开 PR 也直接上线）；
+2. **构建命令**填 `node update.js --no-deploy`，**部署命令**填 `npx wrangler deploy`（仓库里 `wrangler.jsonc` 的 `assets` 指向站点目录，`wrangler` 写进 `devDependencies`）；
+3. 同一页 → 部署挂钩 → 添加（如 `cron-daily`，选 `main` 分支），复制面板给出的完整 URL，别手工拼；
+4. Cron Worker 同路线 A 第 3 步，`DEPLOY_HOOK_URL` 填第 3 步地址，cron 按 UTC 写；
+5. 构建命令非 0 退出 → 本次构建失败 → 线上保持上一个成功构建；
+6. 面板构建列表里「push 自动构建成功」和「Cron 触发的构建成功」两条都绿才算通。
+
+认错项目类型会一直找不到入口：能改「输出目录」的是 Pages，让你分别填「构建命令」「部署命令」的是 Workers。接了 Git 集成的 Workers 项目，push 到生产分支就自动上线——改脚本时先在本地 `node update.js --no-deploy` 试跑，再推。
+
+### 路线 C：站点部署在 GitHub（Pages / 源码在仓库里）
+
+用 **GitHub Actions `schedule`** 跑 `node update.js`：拷 `assets/workflow-update.yml` 到 `.github/workflows/update.yml`，密钥（`CLOUDFLARE_API_TOKEN` 等）走 Settings → Secrets，改动要提交回仓库。公开仓库 60 天无提交活动 schedule 会被自动停用，手动 `workflow_dispatch` 跑一次即可唤醒。
+
+### 通用要点
+
 - **脚本与调度解耦**：`update.js` 只做「抓→建→校验→部署」，跑在哪由外层调度决定（Cron Worker / Actions schedule 都调同一个文件）。校验不过就退出码非 0，构建/任务失败、线上保持上一版，天然满足「宁可今天不更新」。
 - **更新流程与复刻规则一致**：只抓新增、老条目跳过；新卡片一开始就写成 `./repo/xxx.html` + `data-card="1"`，不留原站外链；重建**所有**数据驱动页面（详情页、标签页、榜单页、期刊页、文章页、全部条目页、分页）；管住三条硬指标——非 GitHub 外链 0、`href="#"` 0、站内链接目标文件都存在；新增详情页要带 GitHub 源码按钮（数据里没 `full_name` 就先生成，别留无按钮页面）；备份改动前文件到 `backup/时间戳/` 只留 7 份；全过程写 `update-log.txt`。
-- **云端注意**：cron 是 **UTC**（北京 09:00 写 `0 1 * * *`，每两天写 `0 1 */2 * *`），整点可能延迟几分钟；云端出网是数据中心 IP，原站风控可能 403 或弹验证码，先手动触发试跑一次，被拦就上 Cloudflare Browser Rendering（`@cloudflare/puppeteer`）或 Actions 里的 Playwright；Worker 无持久文件系统，`raw/`、`backup/`、日志这些只在构建过程里成立。
+- **云端注意**：cron 是 **UTC**（北京 09:00 写 `0 1 * * *`，每两天写 `0 1 */2 * *`，每周写 `0 1 * * 1`），整点可能延迟几分钟；云端出网是数据中心 IP，原站风控可能 403 或弹验证码，先手动触发试跑一次，被拦就上 Cloudflare Browser Rendering（`@cloudflare/puppeteer`）或 Actions 里的 Playwright；Worker 无持久文件系统，`raw/`、`backup/`、日志这些只在构建过程里成立，要留状态写 KV/D1/R2。
+- **不重复触发**：站点源码同时在 GitHub、又想统一在 Cloudflare 触发时，让 Worker 调 GitHub `repository_dispatch` 也行，但二选一别两条链路同时跑。
