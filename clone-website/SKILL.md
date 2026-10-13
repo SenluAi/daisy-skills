@@ -103,7 +103,11 @@ description: "把网站完整复刻成可离线/可部署的静态站——全�
 
 用户要「每天/每两天自动同步原站」时，在项目里做一个 `update.js`（抓原站列表 → 只抓新增详情页 → 重建全部数据驱动页面 → 校验 → 部署 → 线上抽查）。**定时一律跑在云端，不用本地电脑挂计划任务**（关机、合盖、没登录就断档）。细节与模板见 `website-auto-update` 技能，这里只留和复刻站对接的要点：
 
-- **站点在 Cloudflare（本技能的默认部署方式：wrangler + senlinlu.cn）**：定时用 **Cron Worker 定时 POST Pages Deploy Hook**，抓取与重建放进 Pages 构建命令（`node update.js --no-deploy`），页面永远由构建生成，Worker 无状态。拷 `website-auto-update` 技能的 `assets/cron-worker.js` + `assets/wrangler.toml`，改 `name` 和 `[triggers] crons`，`npx wrangler secret put DEPLOY_HOOK_URL` 后 `npx wrangler deploy`；Deploy Hook 只负责「触发一次构建」，它自己不会定时，也不会帮你抓数据。
+- **站点在 Cloudflare（本技能的默认部署方式：wrangler + senlinlu.cn）**：定时用 **Cron Worker 定时 POST Pages Deploy Hook**，抓取与重建放进 Pages 构建命令（`node update.js --no-deploy`），页面永远由构建生成，Worker 无状态。落地就四步：
+  1. **改构建命令**：Cloudflare 面板 → Pages 项目 → Settings → Builds & deployments → Build command 改成 `node update.js --no-deploy`，Output directory 指向生成站点的目录（如 `site`）。这一步是把「抓新内容」真正挂进网站的构建里，不改它，Deploy Hook 每次只是重建旧内容。
+  2. **校验失败 = 构建失败 = 线上不换**：`update.js` 校验不过时退出码非 0，Pages 构建失败，线上保持上一个成功版本，天然满足「宁可今天不更新」。
+  3. **建 Deploy Hook，交给 Worker 定时**：同一页面 Deploy hooks 里建一个（如 `cron-daily`），复制完整 URL；拷 `website-auto-update` 技能的 `assets/cron-worker.js` + `assets/wrangler.toml`，改 `name` 和 `[triggers] crons`，`npx wrangler secret put DEPLOY_HOOK_URL` 后 `npx wrangler deploy`。Deploy Hook 只负责「触发一次构建」，它自己不会定时，也不会帮你抓数据。
+  4. **核对一次**：`npx wrangler tail` 看下一次触发，或访问 `https://<worker>.<账号>.workers.dev/?key=<ADMIN_KEY>` 手动触发，去 Pages 看是否出现新构建、新内容是否上线。
 - **站点部署在 GitHub（Pages / 源码在仓库里）**：用 **GitHub Actions `schedule`** 跑 `node update.js`，拷 `assets/workflow-update.yml`，密钥（`CLOUDFLARE_API_TOKEN` 等）走 Settings → Secrets，改动要提交回仓库。
 - **脚本与调度解耦**：`update.js` 只做「抓→建→校验→部署」，跑在哪由外层调度决定（Cron Worker / Actions schedule 都调同一个文件）。校验不过就退出码非 0，构建/任务失败、线上保持上一版，天然满足「宁可今天不更新」。
 - **更新流程与复刻规则一致**：只抓新增、老条目跳过；新卡片一开始就写成 `./repo/xxx.html` + `data-card="1"`，不留原站外链；重建**所有**数据驱动页面（详情页、标签页、榜单页、期刊页、文章页、全部条目页、分页）；管住三条硬指标——非 GitHub 外链 0、`href="#"` 0、站内链接目标文件都存在；新增详情页要带 GitHub 源码按钮（数据里没 `full_name` 就先生成，别留无按钮页面）；备份改动前文件到 `backup/时间戳/` 只留 7 份；全过程写 `update-log.txt`。
