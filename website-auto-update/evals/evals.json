@@ -4,19 +4,25 @@
     {
       "id": 1,
       "prompt": "让这个站自动更新吧，每天自动同步原站新内容",
-      "expected_output": "先确认项目数据文件/构建脚本/部署命令，复制 assets/update-template.js 填好 CONFIG，试运行 --no-deploy，模拟删两条数据验证能自动补回，真跑一次部署，并用 scripts/register-schedule.ps1 注册每日计划任务",
+      "expected_output": "先确认项目数据文件/构建脚本/站点部署在哪（Cloudflare 还是 GitHub），复制 assets/update-template.js 填好 CONFIG，试运行 --no-deploy，模拟删两条数据验证能自动补回，真跑一次部署，再按部署位置接上云端定时：Cloudflare 用 assets/cron-worker.js + assets/wrangler.toml，GitHub 用 assets/workflow-update.yml",
       "files": []
     },
     {
       "id": 2,
       "prompt": "改成每两天更新一次就行",
-      "expected_output": "重跑 register-schedule.ps1 -DaysInterval 2 就地更新触发器，不新建重复任务，并用 NextRunTime 核对",
+      "expected_output": "按站点部署位置改调度：Cloudflare 改 wrangler.toml 的 [triggers] crons 为 0 1 */2 * * 后 npx wrangler deploy；GitHub 改 workflow 的 cron 为 0 1 */2 * * 并提交。都用 wrangler tail 或 workflow 运行记录核对下次触发时间，不新建重复调度",
       "files": []
     },
     {
       "id": 3,
       "prompt": "这个网站是怎么自动更新的？帮我看看有没有问题",
-      "expected_output": "读项目 README 与 update.js，查看 update-log.txt 最近一次记录和 backup 数量，必要时空跑一次 --no-deploy 核对本地校验数字",
+      "expected_output": "读项目 README 与 update.js，确认云端调度是 Cloudflare Cron Worker 还是 GitHub Actions，查看最近一次日志（Workers Logs / Pages 构建日志 / update-log.txt）与 backup 数量，必要时空跑一次 --no-deploy 核对校验数字",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "电脑关机的时候这个站还能自动更新吗？我不想电脑一直开着",
+      "expected_output": "说明定时全在云端、不需要本地计划任务：站点部署在 Cloudflare 就用 Cron Worker 定时 POST Pages Deploy Hook，抓取与构建放进 Pages 构建命令；部署在 GitHub 就用 Actions schedule；并给出对应模板与 UTC cron 写法",
       "files": []
     }
   ]
