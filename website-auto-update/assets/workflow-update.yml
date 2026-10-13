@@ -1,0 +1,63 @@
+# 云端定时更新模板：GitHub Actions schedule
+# 用法：复制到站点仓库的 .github/workflows/update.yml，按项目改 cron、构建命令与 CONFIG 环境变量
+name: site-auto-update
+
+on:
+  schedule:
+    # 时间是 UTC！北京时间每天 09:00 = 01:00 UTC；每两天一次写 0 1 */2 * *
+    - cron: "0 1 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: site-auto-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - run: npm ci
+
+      # 只有需要浏览器渲染的原站才打开这两行（数据中心 IP 可能被原站风控拦截）
+      # - run: npx playwright install --with-deps chromium
+
+      - name: Run update
+        env:
+          # 密钥一律放 Settings -> Secrets，不要写进仓库
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node update.js
+
+      - name: Commit site files back
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "no changes"
+          else
+            git commit -m "chore: auto update site content"
+            git push
+          fi
+
+      - name: Upload update log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: update-log
+          path: update-log.txt
+          if-no-files-found: ignore
