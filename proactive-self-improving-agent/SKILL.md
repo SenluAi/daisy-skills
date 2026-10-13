@@ -1,7 +1,7 @@
 ---
 name: proactive-self-improving-agent
-version: 1.0.0
-description: "自动捕获经验并安全进化的技能。触发条件：(1)命令/操作失败时→记ERRORS.md (2)被用户纠正('不对'/'应该是')时→记LEARNINGS.md (3)用户需要不存在的能力时→记FEATURE_REQUESTS.md (4)外部API/工具出错时→记ERRORS.md (5)发现自己知识过时/错误时→记LEARNINGS.md (6)发现更好做法时→记LEARNINGS.md (7)每个任务完成时→回顾过程，有新经验则记LEARNINGS.md。去重原则：如果没有新经验或已有条目已覆盖则跳过不写。每次写入同时在.learnings/CHANGELOG.md追加JSONL日志。经验反复出现≥3次时晋升到AGENTS.md/TOOLS.md/SOUL.md。详见正文。"
+version: 1.1.0
+description: "自动捕获经验并安全进化，同时当错题本用。触发条件：(1)命令/操作失败 (2)被用户纠正(不对/应该是) (3)用户需要不存在的能力 (4)外部API/工具出错 (5)发现自己知识过时 (6)发现更好做法 (7)每个任务完成时回顾过程。用户说「记错题」「记一笔」「吸取教训」「别重复犯错」「复盘一下刚才」「你上次错在哪」时也用。记录写入本机 C:\Users\Mr Li\AppData\Roaming\Daisy\extensions\skills\proactive-self-improving-agent\.learnings\ 下的 LEARNINGS.md / ERRORS.md / FEATURE_REQUESTS.md，并追加 CHANGELOG.md JSONL 日志；去重：没有新经验或不比已有新就别写；同一个坑再犯只在原条目标 ×2，不新开行；开工前先读最近 10 条按纠正路径执行；经验反复≥3 次晋升到 AGENTS.md/TOOLS.md/SOUL.md。详见正文。"
 author: yanhongxi-openclaw
 ---
 
@@ -42,6 +42,39 @@ author: yanhongxi-openclaw
 ---
 
 ## 2. 经验记录系统
+
+### 2.0 Daisy 落地约定（本机路径 · 开工前必读）
+
+> 下面几条是从「AI 错题本」技能合并过来的，属于本机实拍经验，优先于本文档的通用示例。
+
+**本机真实路径（读写都用绝对路径，不要用相对 `.learnings/`）：**
+
+- 技能文件：`C:\Users\Mr Li\AppData\Roaming\Daisy\extensions\skills\proactive-self-improving-agent\SKILL.md`
+- 经验文件：`C:\Users\Mr Li\AppData\Roaming\Daisy\extensions\skills\proactive-self-improving-agent\.learnings\LEARNINGS.md`
+- 错误文件：`C:\Users\Mr Li\AppData\Roaming\Daisy\extensions\skills\proactive-self-improving-agent\.learnings\ERRORS.md`
+- 能力请求：`C:\Users\Mr Li\AppData\Roaming\Daisy\extensions\skills\proactive-self-improving-agent\.learnings\FEATURE_REQUESTS.md`
+- 操作日志：`C:\Users\Mr Li\AppData\Roaming\Daisy\extensions\skills\proactive-self-improving-agent\.learnings\CHANGELOG.md`
+
+**开工前必读（防止记了不看）：** 接新任务前先读 LEARNINGS.md 与 ERRORS.md 各最近 10 条；命中同类先按纠正路径做，绝不原样重试。
+
+**一行式结论：** 每条经验必须能用一行说清「错在哪（真实报错原文）→ 纠正路径」。LEARNINGS.md 顶部维护一张速查表，一行一条，只写可执行结论：
+
+| 日期 | 任务 | 错在哪（真实报错） | 纠正路径 |
+|---|---|---|---|
+
+**同坑不新开行：** 同一个坑再犯，只在原条目后标 `×2`（再犯标 `×3`…），不新增条目；`×3` 即触发第 3 节晋升或提取技能。
+
+**用户问「你上次错在哪」：** 直接读文件回答，不凭回忆、不现编。
+
+**前置确认：** 真实报错原文、工具返回、截图路径、任务目标一律自动获取，不问用户；只有「用户认为我错了、我这边看不出错」时问一次，且不问细节。
+
+**Daisy 已实测的有效纠正路径（沿用，别再踩）：**
+
+- `quit_application` 对 QQ 返回「已找到 QQ，但无法安全确定其进程名称」→ 改用 `desktop_click` 点窗口右上角关闭按钮，一次成功
+- 视觉点击坐标偏差会点空 → 每轮以最新附带的截图坐标为准，动作后看验证截图，不用旧截图连续点
+- 技能要生效必须放在 `C:\Users\Mr Li\AppData\Roaming\Daisy\extensions\skills\<英文名>\SKILL.md`，frontmatter 用 `name`/`description` 两字段，写好立即生效，无需重启
+- 停用/启用技能改同目录的 `disabled.json`（写技能英文名数组），不要去动别人的加载路径
+
 
 ### 准入标准（写不写，先过这一关）
 
@@ -400,6 +433,14 @@ sed -n '/^```jsonl$/,/^```$/p' .learnings/CHANGELOG.md | grep -v '```'
 
 ---
 
+### 5.4 常见坑（Daisy 版）
+
+- 写成情绪化检讨或长文复盘 → 没用，只留「错因＋下次动作」。
+- 把没验证的做法先记上 → 会把弯路固化成习惯，比不记更糟。
+- 记了不读 → 等于没记，开工前必须先读最近 10 条。
+- 把工具本身的能力限制（Windows 未实现的备忘录/提醒/日历/邮件/地图/音频切换）当错题记 → 该记的是我自己的选择错误。
+- 同一个坑反复新开行 → 应原条标 ×2，否则台账会被重复条目污染。
+- 触发 ≠ 必须写：没有新经验就跳过，别为了显得在进化而刷记录。
 ## 6. 快速参考
 
 ### 触发速查
