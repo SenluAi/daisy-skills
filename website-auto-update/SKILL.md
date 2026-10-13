@@ -57,4 +57,4 @@ description: 给已复刻或自建的静态网站做定时自动更新——抓�
 - `assets/update-template.js` — 通用更新脚本模板（含备份、只抓新增、校验、部署、线上校验、日志）。
 - `scripts/register-schedule.ps1` — 注册/修改计划任务（`-DaysInterval 1|2|7`、`-At 9am`）。
 - `evals/evals.json` — 触发用例。
-- 真实完整样板：`C:\Users\Mr Li\Desktop\hellogithub-clone\update.js`（HelloGitHub 镜像站，含 60 条数据的实战版本），改别的站时对照它填 CONFIG 最省事。
+- 真实完整样板：`<桌面>\hellogithub-clone\update.js`（HelloGitHub 镜像站，含 60 条数据的实战版本），改别的站时对照它填 CONFIG 最省事。

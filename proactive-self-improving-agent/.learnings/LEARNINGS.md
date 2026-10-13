@@ -14,7 +14,7 @@
 |---|---|---|---|
 | 2026-10-10 | 关闭 QQ 窗口 | `quit_application` 返回「已找到 QQ，但无法安全确定其进程名称」，原样重试两次均无变化 | 改用 `desktop_click` 点窗口右上角关闭按钮，一次成功 |
 | 2026-10-10 | 视觉点击 | 截图坐标换算偏差，出现点空、需二次修正 | 每轮动作前以最新附带截图的坐标为准，动作后看验证截图 |
-| 2026-10-10 | 技能加载 | 文件放在 `C:\Users\Mr Li\Daisy-Skills\productivity\AI错题本.md`，Daisy 技能列表里始终没有，`read_skill` 报技能不存在或未启用 | Daisy 从 `C:\Users\Mr Li\AppData\Roaming\Daisy\extensions\skills\<英文名>\SKILL.md` 加载，frontmatter 用 `name`/`description`，写好立即生效 |
+| 2026-10-10 | 技能加载 | 文件放在 `<用户目录>\Daisy-Skills\productivity\AI错题本.md`，Daisy 技能列表里始终没有，`read_skill` 报技能不存在或未启用 | Daisy 从 `<%APPDATA%>\Daisy\extensions\skills\<英文名>\SKILL.md` 加载，frontmatter 用 `name`/`description`，写好立即生效 |
 
 ---
 
@@ -53,10 +53,11 @@ quit_application 对 QQ 返回「已找到 QQ，但无法安全确定其进程�
 **Priority**: high  **Status**: resolved  **Area**: config
 
 ### 内容
-技能文件放在 C:\Users\Mr Li\Daisy-Skills\productivity\AI错题本.md 时 Daisy 技能列表里始终没有，ead_skill 报技能不存在或未启用。
+技能文件放在 <用户目录>\Daisy-Skills\productivity\AI错题本.md 时 Daisy 技能列表里始终没有，
+ead_skill 报技能不存在或未启用。
 
 ### 建议修复
-技能必须放在 C:\Users\Mr Li\AppData\Roaming\Daisy\extensions\skills\<英文名>\SKILL.md，frontmatter 用 
+技能必须放在 <%APPDATA%>\Daisy\extensions\skills\<英文名>\SKILL.md，frontmatter 用 
 ame/description，写好立即生效无需重启；停用改同目录 disabled.json。
 
 ### 元数据

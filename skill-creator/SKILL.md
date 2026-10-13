@@ -22,7 +22,7 @@ description: 创建新技能、修改和优化已有技能、检验技能好不�
 - 环境是 **Windows + PowerShell**，路径用反斜杠，别写 `open` / `nohup` / `/tmp`。
 
 技能目录固定为：
-`C:\Users\Mr Li\AppData\Roaming\Daisy\extensions\skills\<skill-name>\SKILL.md`
+`%APPDATA%\Daisy\extensions\skills\<skill-name>\SKILL.md`
 
 ## 流程
 
@@ -84,7 +84,7 @@ skill-name/
 产物要能直接看：文档/图片/视频用对应应用打开，或把文件夹在资源管理器里打开给用户指路。产物是文档类就顺手转成易读格式。如果确实需要一个汇总页面，可以用：
 
 ```powershell
-python "C:\Users\Mr Li\AppData\Roaming\Daisy\extensions\skills\skill-creator\eval-viewer\generate_review.py" <workspace>\iteration-1 --skill-name <name> --static <workspace>\iteration-1\review.html
+python "%APPDATA%\Daisy\extensions\skills\skill-creator\eval-viewer\generate_review.py" <workspace>\iteration-1 --skill-name <name> --static <workspace>\iteration-1\review.html
 ```
 
 然后用浏览器打开那个 HTML 文件。别自己手写一套页面。
@@ -103,13 +103,13 @@ python "C:\Users\Mr Li\AppData\Roaming\Daisy\extensions\skills\skill-creator\eva
 ### 8. 收尾
 
 ```powershell
-python "C:\Users\Mr Li\AppData\Roaming\Daisy\extensions\skills\skill-creator\scripts\quick_validate.py" "<技能目录>"
+python "%APPDATA%\Daisy\extensions\skills\skill-creator\scripts\quick_validate.py" "<技能目录>"
 ```
 
 校验通过后告诉用户技能装在哪、怎么用。需要分发或备份时可用：
 
 ```powershell
-python "C:\Users\Mr Li\AppData\Roaming\Daisy\extensions\skills\skill-creator\scripts\package_skill.py" "<技能目录>"
+python "%APPDATA%\Daisy\extensions\skills\skill-creator\scripts\package_skill.py" "<技能目录>"
 ```
 
 ## 本技能自带的参考文件

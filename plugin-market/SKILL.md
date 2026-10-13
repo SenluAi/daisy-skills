@@ -17,7 +17,7 @@ description: 查找并安装社区技能或插件。用户说「找插件」「�
 ## 执行步骤
 1. 用 `web_search` / `scrape_url` 检索市场：skills.sh、Anthropic 官方插件市场（anthropics/knowledge-work-plugins）、GitHub 上 `awesome-*skills*` 类列表。
 2. 列 3～5 个候选，每条给：名称 / 作用 / 安装方式 / 最近更新 / 风险点。
-3. 用户选定后，把技能 `.md` 下载到 `Daisy-Skills/<分类>/`，命名用中文短名。
+3. 用户选定后，把技能 `.md` 下载到`Daisy\extensions\skills\`，命名用中文短名或者英文名。
 4. 回 `README.md` 索引补一行，并标明哪些是纯文本可用、哪些需要宿主支持接口。
 
 ## 常见坑

@@ -47,13 +47,15 @@ author: yanhongxi-openclaw
 
 > 下面几条是从「AI 错题本」技能合并过来的，属于本机实拍经验，优先于本文档的通用示例。
 
-**本机真实路径（读写都用绝对路径，不要用相对 `.learnings/`）：**
+**路径一律用占位符，不写死本机绝对路径（写死了别人导入就失效）——技能目录 = Daisy 技能目录下的本技能目录**
 
-- 技能文件：`C:\Users\Mr Li\AppData\Roaming\Daisy\extensions\skills\proactive-self-improving-agent\SKILL.md`
-- 经验文件：`C:\Users\Mr Li\AppData\Roaming\Daisy\extensions\skills\proactive-self-improving-agent\.learnings\LEARNINGS.md`
-- 错误文件：`C:\Users\Mr Li\AppData\Roaming\Daisy\extensions\skills\proactive-self-improving-agent\.learnings\ERRORS.md`
-- 能力请求：`C:\Users\Mr Li\AppData\Roaming\Daisy\extensions\skills\proactive-self-improving-agent\.learnings\FEATURE_REQUESTS.md`
-- 操作日志：`C:\Users\Mr Li\AppData\Roaming\Daisy\extensions\skills\proactive-self-improving-agent\.learnings\CHANGELOG.md`
+- 技能文件：`<技能目录>\SKILL.md`
+- 经验文件：`<技能目录>\.learnings\LEARNINGS.md`
+- 错误文件：`<技能目录>\.learnings\ERRORS.md`
+- 能力请求：`<技能目录>\.learnings\FEATURE_REQUESTS.md`
+- 操作日志：`<技能目录>\.learnings\CHANGELOG.md`
+
+**技能目录怎么展开：** Windows `%APPDATA%\Daisy\extensions\skills\<英文名>`，macOS `~/.config/Daisy/extensions/skills/<英文名>`（以实际安装位置为准）；本技能名固定为 `proactive-self-improving-agent`。展开出的真实路径必须指向本技能自身所在目录，不要照抄别人的。
 
 **开工前必读（防止记了不看）：** 接新任务前先读 LEARNINGS.md 与 ERRORS.md 各最近 10 条；命中同类先按纠正路径做，绝不原样重试。
 
@@ -72,8 +74,8 @@ author: yanhongxi-openclaw
 
 - `quit_application` 对 QQ 返回「已找到 QQ，但无法安全确定其进程名称」→ 改用 `desktop_click` 点窗口右上角关闭按钮，一次成功
 - 视觉点击坐标偏差会点空 → 每轮以最新附带的截图坐标为准，动作后看验证截图，不用旧截图连续点
-- 技能要生效必须放在 `C:\Users\Mr Li\AppData\Roaming\Daisy\extensions\skills\<英文名>\SKILL.md`，frontmatter 用 `name`/`description` 两字段，写好立即生效，无需重启
-- 停用/启用技能改同目录的 `disabled.json`（写技能英文名数组），不要去动别人的加载路径
+- 技能要生效必须放在 `%APPDATA%\Daisy\extensions\skills\<英文名>\SKILL.md`（macOS `~/.config/Daisy/extensions/skills/<英文名>/SKILL.md`），frontmatter 用 `name`/`description` 两字段，写好立即生效，无需重启
+- 停用/启用技能优先用技能列表里的开关；直接改 `disabled.json` 时内容是数组、元素必须是带前缀的技能 ID（如 `personal:self-improving-agent`），格式错了会导致整个技能列表加载失败
 
 
 ### 准入标准（写不写，先过这一关）

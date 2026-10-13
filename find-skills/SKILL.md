@@ -93,6 +93,6 @@ npx skills add <owner/repo@skill> -g -y
 
 ## 常见坑（Daisy 环境）
 
-- `npx skills add -g` 默认装到 `~/.claude/skills` 等宿主目录，Daisy 读不到；要真正启用需把 SKILL.md 放到 `C:\Users\Mr Li\AppData\Roaming\Daisy\extensions\skills\<技能名>\SKILL.md`。
+- `npx skills add -g` 默认装到 `~/.claude/skills` 等宿主目录，Daisy 读不到；要真正启用需把 SKILL.md 放到 `%APPDATA%\Daisy\extensions\skills\<技能名>\SKILL.md`。
 - 带运行时代码/hook 的技能装上也跑不起来，只有纯文本技能可直接调用；下载 ≠ 可用。
 - 安装前先确认目标文件真实存在，别凭旧链接猜。
